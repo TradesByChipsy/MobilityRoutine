@@ -84,6 +84,14 @@
   .dur b{font-size:21px;font-weight:800;display:block;line-height:1}
   .dur span{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
 
+  .warmup{padding:14px 18px 15px;background:var(--surface-2);border-bottom:1px solid var(--line)}
+  .warmup-label{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:10px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--aqua-deep);display:flex;justify-content:space-between}
+  .warmup-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:9px}
+  .wu-item{text-align:center}
+  .wu-item .wu-name{font-weight:600;font-size:11px;color:var(--ink);line-height:1.2}
+  .wu-item .wu-cue{font-size:9.5px;color:var(--ink-soft);margin-top:3px;line-height:1.35;display:block}
+
   ol.list{list-style:none;padding:6px 0 10px}
   li.ex{padding:15px 18px;border-bottom:1px solid var(--line)}
   li.ex:last-child{border-bottom:0}
@@ -140,7 +148,7 @@
 <body>
 <div class="app">
   <header>
-    <div class="eyebrow">Täglich · 8–10 Minuten</div>
+    <div class="eyebrow">Täglich · 9–11 Minuten</div>
     <h1>Beweglich bleiben.<br><span class="thin">Knie zuerst, Körper als Ganzes.</span></h1>
     <p class="sub">Jede Übung mit 2 kurzen Schritten. Tippe „Video ansehen" → Clip spielt direkt hier. Standardmäßig zu, damit die Übersicht schnell bleibt.</p>
 
@@ -166,6 +174,10 @@
       <h2 id="title"></h2>
       <p class="why" id="why"></p>
     </div>
+    <div class="warmup">
+      <div class="warmup-label"><span>Vor jeder Einheit</span><span>~90 Sek.</span></div>
+      <div class="warmup-row" id="warmup"></div>
+    </div>
     <ol class="list" id="list"></ol>
   </section>
 
@@ -177,6 +189,7 @@
         <p><span class="pill y"></span><strong>4+/10 oder am Folgetag schlechter</strong> → Reichweite verkleinern, Gewicht raus, flacher werden.</p>
         <p><span class="pill r"></span><strong>Stechend, blockierend, plötzlich</strong> → Übung stoppen. Hält es an, ab zum Physio/Sportarzt.</p>
         <p style="margin-top:12px;color:#eaf3f2"><strong>Progression:</strong> Wo 1–2 nur Körpergewicht &amp; sauber lernen · Wo 3–4 leichtes Gewicht, etwas tiefer · Wo 5–6 auf <em>Kraft &amp; Explosiv</em> wechseln, sobald das Knie ruhig ist · Wo 7–8 volle Reichweite und mehr Tempo.</p>
+        <p><strong>Self-Check alle 2 Wochen:</strong> Tiefe Hocke, Übergangsknie und Schulter-CARs kurz filmen oder notieren — kleine ROM-Zugewinne sieht man selten im Moment, aber im Vergleich über Wochen.</p>
         <p style="color:#9fbcbc">Kein Ersatz für ärztlichen Rat. Bei anhaltenden Knieschmerzen ohne Sturz einmal abklären lassen.</p>
       </div>
     </details>
@@ -285,6 +298,19 @@ const DAYS = [
   p1:[{id:"deepSquat",d:"2 Min. + Atmung"},{id:"dehnFlow",d:"3 Min."},{id:"legSwings",d:"je 10"},{id:"balance",d:"1 Min./Seite, entspannt"}],
   p2:[{id:"deepSquat",d:"2 Min. + Atmung"},{id:"dehnFlow",d:"3 Min."},{id:"legSwings",d:"je 10"},{id:"balance",d:"1 Min./Seite, entspannt"}]}
 ];
+
+const WARMUP=[
+  {name:"Atmung",cue:"5× tief in die Rippen, lang aus"},
+  {name:"Nacken-CARs",cue:"Volle Kreise, beide Richtungen"},
+  {name:"Handgelenk-CARs",cue:"Kreisen, entspannt, beide Seiten"},
+  {name:"Sprunggelenk-CARs",cue:"Fuß kreisen, großer Radius"}
+];
+const warmupEl=document.getElementById('warmup');
+WARMUP.forEach(w=>{
+  const d=document.createElement('div');d.className='wu-item';
+  d.innerHTML=`<div class="wu-name">${w.name}</div><span class="wu-cue">${w.cue}</span>`;
+  warmupEl.appendChild(d);
+});
 
 let phase=1;
 let selected=(new Date().getDay()+6)%7;   // Mo=0 … So=6

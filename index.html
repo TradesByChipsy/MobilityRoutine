@@ -45,7 +45,8 @@
   .tide-chart .tc-label{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
   .tide-chart .tc-label span{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:10px;
     letter-spacing:.14em;text-transform:uppercase;color:#5f8482}
-  .tide-svg{display:block;width:100%;height:34px;overflow:visible}
+  .tide-chart .tc-label span.streak.on{color:var(--tide)}
+  .tide-svg{display:block;width:100%;height:auto;overflow:visible}
   .tide-svg path.wave{fill:none;stroke:var(--aqua);stroke-width:1.4;opacity:.45;stroke-linecap:round}
   .tide-svg circle.mark{fill:var(--sea);stroke:var(--aqua);stroke-width:1.6;opacity:.85}
   .tide-svg circle.mark.on{fill:var(--tide);stroke:var(--tide)}
@@ -69,6 +70,8 @@
   .day[aria-selected="true"]{background:var(--aqua);border-color:var(--aqua);color:#031c1e;
     box-shadow:var(--shadow);transform:translateY(-1px)}
   .day[aria-selected="true"] .bar i{background:#031c1e;opacity:.85}
+  .day.done .bar i{background:var(--tide);opacity:1}
+  .day.done[aria-selected="true"] .bar i{background:#031c1e}
 
   .card{background:var(--surface);border-radius:22px;margin-top:16px;box-shadow:var(--shadow);overflow:hidden;
     border:1px solid rgba(15,37,41,.05)}
@@ -98,7 +101,21 @@
   .ex-top{display:flex;gap:12px;align-items:flex-start}
   .num{flex:0 0 26px;height:26px;border-radius:8px;background:var(--surface-2);color:var(--ink-soft);
     font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:13px;
-    display:flex;align-items:center;justify-content:center;margin-top:1px}
+    display:flex;align-items:center;justify-content:center;margin-top:1px;
+    border:1px solid transparent;cursor:pointer;padding:0;transition:.15s}
+  .num:hover{border-color:var(--aqua);color:var(--aqua-deep)}
+  .num:focus-visible{outline:2px solid var(--aqua);outline-offset:2px}
+  .num[aria-pressed="true"]{background:var(--aqua);color:#fff;border-color:var(--aqua)}
+  li.ex.done .ex-name,li.ex.done .ex-dose{opacity:.45}
+  li.ex.done ol.steps{opacity:.4}
+
+  .easy{padding:4px 18px 16px;text-align:center}
+  .easy button{background:none;border:0;cursor:pointer;font-family:"Inter",sans-serif;font-size:11.5px;
+    color:var(--ink-soft);text-decoration:underline;text-underline-offset:3px;padding:5px 9px;border-radius:6px}
+  .easy button:hover{color:var(--aqua-deep)}
+  .easy button:focus-visible{outline:2px solid var(--aqua);outline-offset:2px}
+  .easy button[aria-pressed="true"]{color:var(--tide-deep);font-weight:600;text-decoration:none}
+  .easy button:disabled{opacity:.4;cursor:default;text-decoration:none}
   .ex-head{flex:1;min-width:0}
   .ex-name{font-weight:600;font-size:15px;color:var(--ink);line-height:1.25}
   .ex-dose{display:inline-block;font-family:"Bricolage Grotesque",sans-serif;font-weight:700;
@@ -153,15 +170,16 @@
     <p class="sub">Jede Übung mit 2 kurzen Schritten. Tippe „Video ansehen" → Clip spielt direkt hier. Standardmäßig zu, damit die Übersicht schnell bleibt.</p>
 
     <div class="tide-chart">
-      <div class="tc-label"><span>Belastung diese Woche</span><span>Mo → So</span></div>
-      <svg class="tide-svg" viewBox="0 0 320 34" preserveAspectRatio="none" aria-hidden="true">
-        <path class="wave" d="M0,20 C20,8 40,30 60,18 C80,6 100,28 120,17 C140,7 160,29 180,16 C200,6 220,27 240,15 C260,9 280,26 300,14 C310,10 315,12 320,10"/>
+      <div class="tc-label"><span>Belastung diese Woche</span><span class="streak" id="streak"></span></div>
+      <svg class="tide-svg" viewBox="0 0 320 34" aria-hidden="true">
+        <path class="wave" id="wave"/>
+        <g id="waveMarks"></g>
       </svg>
     </div>
 
     <div class="phase" role="group" aria-label="Phase wählen">
       <button data-phase="1" aria-pressed="true">Aufbau<span class="wk">Woche 1–4 · knieschonend</span></button>
-      <button data-phase="2" aria-pressed="false">Kraft &amp; Explosiv<span class="wk">Woche 5–8 · wenn Knie ruhig</span></button>
+      <button data-phase="2" aria-pressed="false">Kraft &amp; Explosiv<span class="wk">Ab Woche 5 · dauerhaft</span></button>
     </div>
 
     <nav class="week" id="week" aria-label="Wochentag"></nav>
@@ -179,6 +197,7 @@
       <div class="warmup-row" id="warmup"></div>
     </div>
     <ol class="list" id="list"></ol>
+    <div class="easy"><button type="button" id="easyBtn"></button></div>
   </section>
 
   <div class="rules">
@@ -188,7 +207,9 @@
         <p><span class="pill g"></span><strong>0–3/10, dumpfes Ziehen</strong> während der Übung ist ok — dranbleiben.</p>
         <p><span class="pill y"></span><strong>4+/10 oder am Folgetag schlechter</strong> → Reichweite verkleinern, Gewicht raus, flacher werden.</p>
         <p><span class="pill r"></span><strong>Stechend, blockierend, plötzlich</strong> → Übung stoppen. Hält es an, ab zum Physio/Sportarzt.</p>
-        <p style="margin-top:12px;color:#eaf3f2"><strong>Progression:</strong> Wo 1–2 nur Körpergewicht &amp; sauber lernen · Wo 3–4 leichtes Gewicht, etwas tiefer · Wo 5–6 auf <em>Kraft &amp; Explosiv</em> wechseln, sobald das Knie ruhig ist · Wo 7–8 volle Reichweite und mehr Tempo.</p>
+        <p style="margin-top:12px;color:#eaf3f2"><strong>Progression:</strong> Wo 1–2 nur Körpergewicht &amp; sauber lernen · Wo 3–4 leichtes Gewicht, etwas tiefer · Ab Wo 5 auf <em>Kraft &amp; Explosiv</em> wechseln, sobald das Knie ruhig ist · Wo 7–8 volle Reichweite und mehr Tempo.</p>
+        <p><strong>Ab Woche 9 — dauerhaft:</strong> Phase 2 bleibt dein Standard. Es kommen keine neuen Übungen mehr dazu; du steigerst weiter über Gewicht, Tiefe und Tempo. Beweglichkeit bleibt nur, solange sie gefordert wird — deshalb hört das hier nicht auf.</p>
+        <p><strong>Schlechter Tag?</strong> Warm-up plus der lockere Sonntags-Flow zählt auch als erledigt. Klein dranbleiben schlägt aussetzen — und schlägt auf jeden Fall, sich durch Schmerz durchzubeißen.</p>
         <p><strong>Check alle 2 Wochen:</strong> Tiefe Hocke, Ausfallschritt-Knie und Schulterkreisen kurz filmen oder notieren — kleine Fortschritte in der Beweglichkeit sieht man selten im Moment, aber im Vergleich über Wochen.</p>
         <p style="color:#9fbcbc">Kein Ersatz für ärztlichen Rat. Bei anhaltenden Knieschmerzen ohne Sturz einmal abklären lassen.</p>
       </div>
@@ -263,37 +284,37 @@ const EX = {
 };
 
 const DAYS = [
- {dn:"Mo",intensity:2,focus:"Knie & Sprunggelenk",title:"Sehnen laden, Sprunggelenk öffnen",
+ {dn:"Mo",intensity:2,min:[10,11],focus:"Knie & Sprunggelenk",title:"Sehnen laden, Sprunggelenk öffnen",
   why:"Ein steifes Sprunggelenk zwingt das Knie zur Mehrarbeit. Hier fängt Knie-Gesundheit an.",
   p1:[{id:"knieWand",d:"10/Seite"},{id:"tibRaise",d:"2 × 25"},{id:"gobletHeel",d:"3 × 5 · 5 Sek. runter"},{id:"spanishSquat",d:"3 × 30 Sek."}],
   p2:[{id:"knieWand",d:"10/Seite"},{id:"tibRaise",d:"2 × 30, langsamer"},{id:"gobletHeel",d:"3 × 6 · mit Hantel",new:1},{id:"spanishSquat",d:"3 × 40 Sek. · Gewicht",new:1}]},
 
- {dn:"Di",intensity:2,focus:"Hüfte & Flexibilität",title:"Hüften auf, Wirbelsäule geschmeidig",
+ {dn:"Di",intensity:2,min:[8,9],focus:"Hüfte & Flexibilität",title:"Hüften auf, Wirbelsäule geschmeidig",
   why:"Freie Hüften nehmen Last vom Knie. Dazu etwas Wirbelsäulen-Flexibilität.",
   p1:[{id:"h9090",d:"8/Seite"},{id:"couch",d:"40 Sek./Seite"},{id:"cossack",d:"6/Seite"},{id:"jefferson",d:"5, sehr langsam"}],
   p2:[{id:"h9090",d:"8/Seite + Vorbeuge"},{id:"couch",d:"40 Sek./Seite + Reach"},{id:"cossack",d:"8/Seite · Gewicht",new:1},{id:"jefferson",d:"8, sehr langsam · kein Gewicht",new:1}]},
 
- {dn:"Mi",intensity:2,focus:"Ganzkörper & Balance",title:"Verbinden & auf einem Bein stehen",
+ {dn:"Mi",intensity:2,min:[8,9],focus:"Ganzkörper & Balance",title:"Verbinden & auf einem Bein stehen",
   why:"Balance und einbeinige Kontrolle — genau das, was Foilen und Surfen belohnen.",
   p1:[{id:"wgs",d:"5/Seite"},{id:"balance",d:"30 Sek./Seite"},{id:"stepDown",d:"8/Seite"},{id:"birdDog",d:"8/Seite"}],
   p2:[{id:"wgs",d:"6/Seite"},{id:"balance",d:"30 Sek. + Reach"},{id:"stepDown",d:"10/Seite, tiefer",new:1},{id:"slRDL",d:"8/Seite",new:1}]},
 
- {dn:"Do",intensity:3,focus:"Knie & Sprunggelenk II",title:"Tiefe Reichweite, hinten & vorne",
+ {dn:"Do",intensity:3,min:[10,12],focus:"Knie & Sprunggelenk II",title:"Tiefe Reichweite, hinten & vorne",
   why:"Zweite Knie-Einheit mit anderem Reiz: Split-Squat, Hamstrings, Waden.",
   p1:[{id:"splitATG",d:"5–8/Seite · assistiert"},{id:"nordic",d:"3–5 · nur absenken"},{id:"calf",d:"2 × 15"},{id:"deepSquat",d:"60–90 Sek."}],
   p2:[{id:"splitATG",d:"8/Seite · voll, Gewicht",new:1},{id:"nordic",d:"5 · vollständig",new:1},{id:"calf",d:"2 × 12/Seite einbeinig"},{id:"deepSquat",d:"60 Sek. + Rotation"}]},
 
- {dn:"Fr",intensity:2,focus:"Wirbelsäule, Schultern & Rumpf",title:"Oben mobil, Mitte stabil",
+ {dn:"Fr",intensity:2,min:[8,9],focus:"Wirbelsäule, Schultern & Rumpf",title:"Oben mobil, Mitte stabil",
   why:"Ganzkörper-Ausgleich für die Wasser-Sessions — die Schulter kennst du schon vom Reha-Thema.",
   p1:[{id:"catCow",d:"8 Runden"},{id:"shoulderCAR",d:"5/Seite"},{id:"hang",d:"30–45 Sek."},{id:"hipAirplane",d:"6/Seite"}],
   p2:[{id:"catCow",d:"8 Runden + Halt"},{id:"scapPull",d:"6",new:1},{id:"hang",d:"3 × 20 Sek. aktiv"},{id:"hipAirplane",d:"8/Seite freistehend",new:1}]},
 
- {dn:"Sa",intensity:4,focus:"Explosiv & Agilität",title:"Spannkraft & schnelle Füße",
+ {dn:"Sa",intensity:4,min:[10,11],focus:"Explosiv & Agilität",title:"Spannkraft & schnelle Füße",
   why:"Die fehlende Komponente: Reaktivität. In Phase 1 bewusst sanft, solange das Knie gereizt ist.",
   p1:[{id:"pogo",d:"3 × 15"},{id:"fastFeet",d:"3 × 20 Sek."},{id:"aSkip",d:"3 × 20 Sek."},{id:"spanishSquat",d:"3 × 20 · Zehen tippen"}],
   p2:[{id:"boxJump",d:"4 × 4",new:1},{id:"skater",d:"3 × 6/Seite",new:1},{id:"backward",d:"3 × 30 Sek.",new:1},{id:"pogo",d:"3 × 20, schneller"}]},
 
- {dn:"So",intensity:1,focus:"Locker & Regeneration",title:"Bewegen, nicht belasten",
+ {dn:"So",intensity:1,min:[10,10],focus:"Locker & Regeneration",title:"Bewegen, nicht belasten",
   why:"Aktiver Ruhetag. Bewegung hält geschmeidig, ohne Ermüdung — in beiden Phasen gleich.",
   p1:[{id:"deepSquat",d:"2 Min. + Atmung"},{id:"dehnFlow",d:"3 Min."},{id:"legSwings",d:"je 10"},{id:"balance",d:"1 Min./Seite, entspannt"}],
   p2:[{id:"deepSquat",d:"2 Min. + Atmung"},{id:"dehnFlow",d:"3 Min."},{id:"legSwings",d:"je 10"},{id:"balance",d:"1 Min./Seite, entspannt"}]}
@@ -312,8 +333,45 @@ WARMUP.forEach(w=>{
   warmupEl.appendChild(d);
 });
 
-let phase=1;
-let selected=(new Date().getDay()+6)%7;   // Mo=0 … So=6
+/* ---- Gespeicherter Stand: Phase, gewählter Tag, abgehakte Übungen ---- */
+const STORE='mr.v1';
+function load(){try{return JSON.parse(localStorage.getItem(STORE))||{}}catch(e){return{}}}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(state))}catch(e){}}
+const state=load();
+if(!state.done) state.done={};
+
+function dkey(d){const x=d||new Date();
+  return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');}
+const todayIdx=(new Date().getDay()+6)%7;   // Mo=0 … So=6
+// Datum des Wochentags i innerhalb der laufenden Woche (Mo–So)
+function dateForIndex(i){const d=new Date();d.setDate(d.getDate()+(i-todayIdx));return d;}
+// Ein Tag zählt als erledigt, wenn alle Übungen abgehakt sind ODER
+// er bewusst als "locker gemacht" eingetragen wurde. Sonst würde die
+// Serie genau das bestrafen, was die Schmerz-Regel verlangt.
+function isComplete(k){const e=state.done[k];
+  return !!(e&&(e.easy||(e.total&&e.ids.length>=e.total)));}
+function prune(){const c=new Date();c.setDate(c.getDate()-60);const cut=dkey(c);
+  Object.keys(state.done).forEach(k=>{if(k<cut) delete state.done[k]});}
+function streakCount(){let n=0;const d=new Date();
+  if(!isComplete(dkey(d))) d.setDate(d.getDate()-1);
+  while(isComplete(dkey(d))){n++;d.setDate(d.getDate()-1);}
+  return n;}
+
+let phase = state.phase===2?2:1;
+let selected = (state.day && state.day.d===dkey() && typeof state.day.i==='number') ? state.day.i : todayIdx;
+
+/* ---- Wellenlinie aus den echten Intensitätswerten der Woche ---- */
+const WX=[],WY=[];
+DAYS.forEach((d,i)=>{WX.push(320/DAYS.length*(i+.5));WY.push(30-d.intensity*6);});
+(function drawWave(){
+  let p=`M0,${WY[0]} L${WX[0].toFixed(1)},${WY[0]}`;
+  for(let i=0;i<WX.length-1;i++){
+    const x0=WX[i],y0=WY[i],x1=WX[i+1],y1=WY[i+1],dx=(x1-x0)/2;
+    p+=` C${(x0+dx).toFixed(1)},${y0} ${(x1-dx).toFixed(1)},${y1} ${x1.toFixed(1)},${y1}`;
+  }
+  document.getElementById('wave').setAttribute('d',p+` L320,${WY[WY.length-1]}`);
+})();
+const marksEl=document.getElementById('waveMarks');
 
 const weekEl=document.getElementById('week');
 DAYS.forEach((d,i)=>{
@@ -322,19 +380,66 @@ DAYS.forEach((d,i)=>{
   const h=6+d.intensity*3;
   b.innerHTML=`<div class="dn">${d.dn}</div><div class="bar"><i style="height:${h}px"></i></div>`;
   b.setAttribute('aria-label',`${d.dn} · ${d.focus}`);
-  b.onclick=()=>{selected=i;render()};
+  b.onclick=()=>{selected=i;state.day={d:dkey(),i};save();render()};
   weekEl.appendChild(b);
 });
 document.querySelectorAll('.phase button').forEach(btn=>{
-  btn.onclick=()=>{phase=+btn.dataset.phase;
-    document.querySelectorAll('.phase button').forEach(x=>x.setAttribute('aria-pressed',+x.dataset.phase===phase));
-    render();};
+  btn.onclick=()=>{phase=+btn.dataset.phase;state.phase=phase;save();render();};
 });
+
+function toggleDone(i){
+  const k=dkey(dateForIndex(selected));
+  const total=(phase===1?DAYS[selected].p1:DAYS[selected].p2).length;
+  const e=state.done[k]||{ids:[],total};
+  e.total=total;
+  const p=e.ids.indexOf(i);
+  if(p>=0) e.ids.splice(p,1); else e.ids.push(i);
+  if(e.ids.length||e.easy) state.done[k]=e; else delete state.done[k];
+  prune();save();render();
+}
+
+function toggleEasy(){
+  const k=dkey(dateForIndex(selected));
+  const total=(phase===1?DAYS[selected].p1:DAYS[selected].p2).length;
+  const e=state.done[k]||{ids:[],total};
+  e.total=total;e.easy=!e.easy;
+  if(e.ids.length||e.easy) state.done[k]=e; else delete state.done[k];
+  prune();save();render();
+}
+document.getElementById('easyBtn').onclick=toggleEasy;
 
 function render(){
   const d=DAYS[selected];
   const ex=phase===1?d.p1:d.p2;
-  [...weekEl.children].forEach((c,i)=>c.setAttribute('aria-selected',i===selected));
+  const dayKey=dkey(dateForIndex(selected));
+  const doneIds=(state.done[dayKey]||{ids:[]}).ids;
+  const isFuture=dayKey>dkey();
+
+  document.querySelectorAll('.phase button').forEach(x=>
+    x.setAttribute('aria-pressed',+x.dataset.phase===phase));
+  [...weekEl.children].forEach((c,i)=>{
+    c.setAttribute('aria-selected',i===selected);
+    c.classList.toggle('done',isComplete(dkey(dateForIndex(i))));
+  });
+  marksEl.innerHTML='';
+  WX.forEach((x,i)=>{
+    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',x.toFixed(1));c.setAttribute('cy',WY[i]);c.setAttribute('r','2.6');
+    c.setAttribute('class','mark'+(i===selected?' on':''));
+    marksEl.appendChild(c);
+  });
+  const easyOn=!!(state.done[dayKey]&&state.done[dayKey].easy);
+  const eBtn=document.getElementById('easyBtn');
+  eBtn.textContent=easyOn?'✓ Locker erledigt — tippen zum Zurücknehmen'
+                         :'Heute nur locker? Als erledigt eintragen';
+  eBtn.setAttribute('aria-pressed',easyOn);
+  eBtn.disabled=isFuture;
+
+  const n=streakCount(),sEl=document.getElementById('streak');
+  sEl.textContent=n?(n===1?'1 Tag in Folge':n+' Tage in Folge'):'';
+  sEl.classList.toggle('on',n>0);
+
+  document.querySelector('.dur b').textContent='~'+d.min[phase-1];
   document.getElementById('focus').textContent=d.focus;
   document.getElementById('title').textContent=d.title;
   document.getElementById('why').textContent=d.why;
@@ -351,11 +456,14 @@ function render(){
       vidBlock=`<details class="vid-wrap"><summary><span class="tri">▶</span> Video ansehen</summary>
         <div class="vid-fallback"><a href="${ytUrl}" target="_blank" rel="noopener"><span class="tri">▶</span> Demos auf YouTube öffnen</a></div></details>`;
     }
-    const li=document.createElement('li');li.className='ex';
-    li.innerHTML=`<div class="ex-top"><div class="num">${i+1}</div>
+    const done=doneIds.indexOf(i)>=0;
+    const li=document.createElement('li');li.className='ex'+(done?' done':'');
+    li.innerHTML=`<div class="ex-top"><button class="num" type="button" aria-pressed="${done}"
+      aria-label="${info.name} erledigt"${isFuture?' disabled':''}>${done?'✓':i+1}</button>
       <div class="ex-head"><div class="ex-name">${info.name}${e.new?'<span class="badge-new">Phase 2</span>':''}</div>
       <span class="ex-dose">${e.d}</span></div></div>
       <ol class="steps">${steps}</ol>${vidBlock}`;
+    if(!isFuture) li.querySelector('.num').onclick=()=>toggleDone(i);
     list.appendChild(li);
   });
   // Lazy-load embeds only when a video is opened → schnelle Übersicht

@@ -16,59 +16,76 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --sea:#0C2E33;--sea-2:#123c43;--surface:#F6F4EE;--surface-2:#ECEAE2;
-    --ink:#0F2529;--ink-soft:#4a5d61;--aqua:#0E9AA0;--aqua-deep:#0B6C71;
-    --sun:#E39B2E;--line:rgba(15,37,41,.12);
-    --shadow:0 1px 0 rgba(0,0,0,.04), 0 10px 30px -18px rgba(12,46,51,.55);
+    --sea:#081D21;--sea-2:#0F2E33;--sea-3:#153A40;--surface:#FBF8F1;--surface-2:#EFEADB;
+    --ink:#0F2529;--ink-soft:#55696C;--aqua:#1AB3B0;--aqua-deep:#0A7A78;
+    --tide:#E2A23D;--tide-deep:#B97C1E;--line:rgba(15,37,41,.12);
+    --shadow:0 1px 0 rgba(0,0,0,.04), 0 14px 34px -18px rgba(4,20,23,.6);
+    --grain:radial-gradient(circle at 18% 8%, rgba(26,179,176,.16), transparent 55%),
+             radial-gradient(circle at 88% 0%, rgba(226,162,61,.10), transparent 40%);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{-webkit-text-size-adjust:100%}
-  body{font-family:"Inter",system-ui,-apple-system,sans-serif;background:var(--sea);color:var(--ink);
+  body{font-family:"Inter",system-ui,-apple-system,sans-serif;
+    background:var(--grain), linear-gradient(160deg,var(--sea) 0%, #051417 100%);
+    background-attachment:fixed;color:var(--ink);
     line-height:1.5;padding:env(safe-area-inset-top) 14px calc(env(safe-area-inset-bottom) + 28px);
     display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
   .app{width:100%;max-width:540px}
 
-  header{padding:22px 4px 16px;color:#eaf3f2}
-  .eyebrow{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;letter-spacing:.18em;
-    text-transform:uppercase;font-size:11px;color:var(--aqua)}
-  h1{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:27px;line-height:1.08;
-    margin-top:6px;letter-spacing:-.01em}
-  h1 .thin{font-weight:500;color:#a9c4c4}
-  .sub{font-size:13px;color:#9fbcbc;margin-top:9px;max-width:44ch}
+  header{padding:26px 4px 14px;color:#eaf3f2;position:relative}
+  .eyebrow{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;letter-spacing:.2em;
+    text-transform:uppercase;font-size:10.5px;color:var(--aqua);display:flex;align-items:center;gap:8px}
+  .eyebrow::before{content:"";width:16px;height:1px;background:var(--aqua);opacity:.6}
+  h1{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:29px;line-height:1.1;
+    margin-top:8px;letter-spacing:-.015em}
+  h1 .thin{font-weight:500;color:#8fb0b0}
+  .sub{font-size:13px;color:#93b3b3;margin-top:10px;max-width:44ch}
 
-  .phase{display:flex;gap:4px;margin:18px 0 6px;padding:4px;background:var(--sea-2);
+  .tide-chart{margin-top:18px;padding:2px 1px 0}
+  .tide-chart .tc-label{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+  .tide-chart .tc-label span{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:10px;
+    letter-spacing:.14em;text-transform:uppercase;color:#5f8482}
+  .tide-svg{display:block;width:100%;height:34px;overflow:visible}
+  .tide-svg path.wave{fill:none;stroke:var(--aqua);stroke-width:1.4;opacity:.45;stroke-linecap:round}
+  .tide-svg circle.mark{fill:var(--sea);stroke:var(--aqua);stroke-width:1.6;opacity:.85}
+  .tide-svg circle.mark.on{fill:var(--tide);stroke:var(--tide)}
+
+  .phase{display:flex;gap:4px;margin:16px 0 6px;padding:4px;background:var(--sea-2);
     border-radius:14px;border:1px solid rgba(255,255,255,.06)}
   .phase button{flex:1;border:0;cursor:pointer;border-radius:10px;padding:9px 6px;background:transparent;
     color:#a9c4c4;font-family:"Inter",sans-serif;font-weight:600;font-size:12.5px;line-height:1.25;transition:.18s}
   .phase button .wk{display:block;font-size:10px;font-weight:500;opacity:.7;margin-top:1px}
-  .phase button[aria-pressed="true"]{background:var(--sun);color:#231402;box-shadow:var(--shadow)}
-  .phase button[aria-pressed="true"] .wk{opacity:.75}
+  .phase button[aria-pressed="true"]{background:var(--tide);color:#251500;box-shadow:var(--shadow)}
+  .phase button[aria-pressed="true"] .wk{opacity:.78}
+  .phase button:focus-visible,.day:focus-visible{outline:2px solid var(--aqua);outline-offset:2px}
 
   .week{display:flex;gap:6px;overflow-x:auto;padding:14px 2px 4px;scrollbar-width:none;-ms-overflow-style:none}
   .week::-webkit-scrollbar{display:none}
   .day{flex:0 0 auto;min-width:44px;text-align:center;cursor:pointer;background:var(--sea-2);
-    border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:9px 8px;color:#9fbcbc;transition:.18s}
+    border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:8px 8px 7px;color:#8fb0b0;transition:.18s}
   .day .dn{font-size:11px;font-weight:600;letter-spacing:.04em}
-  .day .tick{width:6px;height:6px;border-radius:50%;background:var(--aqua);margin:7px auto 0;opacity:.55}
+  .day .bar{width:14px;height:16px;margin:7px auto 0;display:flex;align-items:flex-end;justify-content:center}
+  .day .bar i{display:block;width:14px;border-radius:2px;background:var(--aqua);opacity:.45}
   .day[aria-selected="true"]{background:var(--aqua);border-color:var(--aqua);color:#031c1e;
     box-shadow:var(--shadow);transform:translateY(-1px)}
-  .day[aria-selected="true"] .tick{background:#031c1e;opacity:1}
+  .day[aria-selected="true"] .bar i{background:#031c1e;opacity:.85}
 
-  .card{background:var(--surface);border-radius:20px;margin-top:14px;box-shadow:var(--shadow);overflow:hidden}
-  .card-head{padding:18px 18px 16px;border-bottom:1px solid var(--line);
-    background:linear-gradient(180deg,#fbf9f4,var(--surface));position:relative}
+  .card{background:var(--surface);border-radius:22px;margin-top:16px;box-shadow:var(--shadow);overflow:hidden;
+    border:1px solid rgba(15,37,41,.05)}
+  .card-head{padding:20px 18px 17px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#fffefb,var(--surface));position:relative}
   .focus-tag{display:inline-block;font-family:"Bricolage Grotesque",sans-serif;font-weight:700;
     font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--aqua-deep);
-    background:rgba(14,154,160,.1);padding:4px 9px;border-radius:100px}
-  .card-head h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:22px;
-    margin-top:10px;letter-spacing:-.01em;line-height:1.12}
-  .card-head .why{font-size:12.5px;color:var(--ink-soft);margin-top:6px;max-width:40ch}
-  .dur{position:absolute;top:16px;right:16px;text-align:right;font-family:"Bricolage Grotesque",sans-serif;color:var(--aqua-deep)}
-  .dur b{font-size:20px;font-weight:800;display:block;line-height:1}
+    background:rgba(26,179,176,.1);padding:4px 9px;border-radius:100px}
+  .card-head h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:23px;
+    margin-top:11px;letter-spacing:-.015em;line-height:1.14;max-width:78%}
+  .card-head .why{font-size:12.5px;color:var(--ink-soft);margin-top:7px;max-width:40ch}
+  .dur{position:absolute;top:18px;right:18px;text-align:right;font-family:"Bricolage Grotesque",sans-serif;color:var(--aqua-deep)}
+  .dur b{font-size:21px;font-weight:800;display:block;line-height:1}
   .dur span{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
 
   ol.list{list-style:none;padding:6px 0 10px}
-  li.ex{padding:14px 18px;border-bottom:1px solid var(--line)}
+  li.ex{padding:15px 18px;border-bottom:1px solid var(--line)}
   li.ex:last-child{border-bottom:0}
   .ex-top{display:flex;gap:12px;align-items:flex-start}
   .num{flex:0 0 26px;height:26px;border-radius:8px;background:var(--surface-2);color:var(--ink-soft);
@@ -78,8 +95,8 @@
   .ex-name{font-weight:600;font-size:15px;color:var(--ink);line-height:1.25}
   .ex-dose{display:inline-block;font-family:"Bricolage Grotesque",sans-serif;font-weight:700;
     font-size:12px;color:var(--aqua-deep);margin-top:3px}
-  .badge-new{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#231402;
-    background:var(--sun);padding:2px 6px;border-radius:100px;margin-left:6px;vertical-align:1.5px}
+  .badge-new{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#251500;
+    background:var(--tide);padding:2px 6px;border-radius:100px;margin-left:6px;vertical-align:1.5px}
   ol.steps{list-style:none;counter-reset:s;margin:9px 0 0 38px;padding:0}
   ol.steps li{counter-increment:s;position:relative;padding:1px 0 1px 20px;font-size:12.8px;
     color:var(--ink-soft);line-height:1.45}
@@ -103,19 +120,20 @@
     background:var(--aqua);border-radius:100px;padding:7px 13px}
   .vid-fallback a .tri{font-size:9px}
 
-  .rules{margin-top:14px;background:var(--sea-2);border-radius:18px;padding:4px 4px 8px;border:1px solid rgba(255,255,255,.06)}
-  .rules summary{list-style:none;cursor:pointer;padding:13px 16px;font-family:"Bricolage Grotesque",sans-serif;
+  .rules{margin-top:16px;background:linear-gradient(180deg,var(--sea-3),var(--sea-2));border-radius:18px;
+    padding:4px 4px 8px;border:1px solid rgba(255,255,255,.07)}
+  .rules summary{list-style:none;cursor:pointer;padding:14px 16px;font-family:"Bricolage Grotesque",sans-serif;
     font-weight:700;font-size:13.5px;display:flex;align-items:center;justify-content:space-between;color:#eaf3f2}
   .rules summary::-webkit-details-marker{display:none}
   .rules summary .chev{transition:.2s;color:var(--aqua)}
   .rules details[open] summary .chev{transform:rotate(90deg)}
-  .rules .rbody{padding:0 16px 14px;font-size:12.8px;line-height:1.6;color:#bcd4d3}
+  .rules .rbody{padding:0 16px 15px;font-size:12.8px;line-height:1.6;color:#a9c7c6}
   .rules .rbody strong{color:#fff}
   .rules .rbody p{margin-bottom:9px}.rules .rbody p:last-child{margin-bottom:0}
   .pill{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
-  .g{background:#4bbf74}.y{background:var(--sun)}.r{background:#e0603e}
+  .g{background:#4bbf74}.y{background:var(--tide)}.r{background:#e0603e}
 
-  footer{text-align:center;color:#6f8d8d;font-size:11px;margin-top:20px;padding:0 10px;line-height:1.6}
+  footer{text-align:center;color:#5f8482;font-size:11px;margin-top:22px;padding:0 10px;line-height:1.7}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -125,6 +143,13 @@
     <div class="eyebrow">Täglich · 8–10 Minuten</div>
     <h1>Beweglich bleiben.<br><span class="thin">Knie zuerst, Körper als Ganzes.</span></h1>
     <p class="sub">Jede Übung mit 2 kurzen Schritten. Tippe „Video ansehen" → Clip spielt direkt hier. Standardmäßig zu, damit die Übersicht schnell bleibt.</p>
+
+    <div class="tide-chart">
+      <div class="tc-label"><span>Belastung diese Woche</span><span>Mo → So</span></div>
+      <svg class="tide-svg" viewBox="0 0 320 34" preserveAspectRatio="none" aria-hidden="true">
+        <path class="wave" d="M0,20 C20,8 40,30 60,18 C80,6 100,28 120,17 C140,7 160,29 180,16 C200,6 220,27 240,15 C260,9 280,26 300,14 C310,10 315,12 320,10"/>
+      </svg>
+    </div>
 
     <div class="phase" role="group" aria-label="Phase wählen">
       <button data-phase="1" aria-pressed="true">Aufbau<span class="wk">Woche 1–4 · knieschonend</span></button>
@@ -225,37 +250,37 @@ const EX = {
 };
 
 const DAYS = [
- {dn:"Mo",focus:"Knie & Sprunggelenk",title:"Sehnen laden, Sprunggelenk öffnen",
+ {dn:"Mo",intensity:2,focus:"Knie & Sprunggelenk",title:"Sehnen laden, Sprunggelenk öffnen",
   why:"Ein steifes Sprunggelenk zwingt das Knie zur Mehrarbeit. Hier fängt Knie-Gesundheit an.",
   p1:[{id:"knieWand",d:"10/Seite"},{id:"tibRaise",d:"2 × 25"},{id:"gobletHeel",d:"3 × 5 · 5 Sek. runter"},{id:"spanishSquat",d:"3 × 30 Sek."}],
   p2:[{id:"knieWand",d:"10/Seite"},{id:"tibRaise",d:"2 × 30, langsamer"},{id:"gobletHeel",d:"3 × 6 · mit Hantel",new:1},{id:"spanishSquat",d:"3 × 40 Sek. · Gewicht",new:1}]},
 
- {dn:"Di",focus:"Hüfte & Flexibilität",title:"Hüften auf, Wirbelsäule geschmeidig",
+ {dn:"Di",intensity:2,focus:"Hüfte & Flexibilität",title:"Hüften auf, Wirbelsäule geschmeidig",
   why:"Freie Hüften nehmen Last vom Knie. Dazu etwas Wirbelsäulen-Flexibilität.",
   p1:[{id:"h9090",d:"8/Seite"},{id:"couch",d:"40 Sek./Seite"},{id:"cossack",d:"6/Seite"},{id:"jefferson",d:"5, sehr langsam"}],
   p2:[{id:"h9090",d:"8/Seite + Vorbeuge"},{id:"couch",d:"40 Sek./Seite + Reach"},{id:"cossack",d:"8/Seite · Gewicht",new:1},{id:"jefferson",d:"5 · leichte Hantel",new:1}]},
 
- {dn:"Mi",focus:"Ganzkörper & Balance",title:"Verbinden & auf einem Bein stehen",
+ {dn:"Mi",intensity:2,focus:"Ganzkörper & Balance",title:"Verbinden & auf einem Bein stehen",
   why:"Balance und einbeinige Kontrolle — genau das, was Foilen und Surfen belohnen.",
   p1:[{id:"wgs",d:"5/Seite"},{id:"balance",d:"30 Sek./Seite"},{id:"stepDown",d:"8/Seite"},{id:"birdDog",d:"8/Seite"}],
   p2:[{id:"wgs",d:"6/Seite"},{id:"balance",d:"30 Sek. + Reach"},{id:"stepDown",d:"10/Seite, tiefer",new:1},{id:"slRDL",d:"8/Seite",new:1}]},
 
- {dn:"Do",focus:"Knie & Sprunggelenk II",title:"Tiefe Reichweite, hinten & vorne",
+ {dn:"Do",intensity:3,focus:"Knie & Sprunggelenk II",title:"Tiefe Reichweite, hinten & vorne",
   why:"Zweite Knie-Einheit mit anderem Reiz: Split-Squat, Hamstrings, Waden.",
   p1:[{id:"splitATG",d:"5–8/Seite · assistiert"},{id:"nordic",d:"3–5 · nur absenken"},{id:"calf",d:"2 × 15"},{id:"deepSquat",d:"60–90 Sek."}],
   p2:[{id:"splitATG",d:"8/Seite · voll, Gewicht",new:1},{id:"nordic",d:"5 · vollständig",new:1},{id:"calf",d:"2 × 12/Seite einbeinig"},{id:"deepSquat",d:"60 Sek. + Rotation"}]},
 
- {dn:"Fr",focus:"Wirbelsäule, Schultern & Rumpf",title:"Oben mobil, Mitte stabil",
+ {dn:"Fr",intensity:2,focus:"Wirbelsäule, Schultern & Rumpf",title:"Oben mobil, Mitte stabil",
   why:"Ganzkörper-Ausgleich für die Wasser-Sessions — die Schulter kennst du schon vom Reha-Thema.",
   p1:[{id:"catCow",d:"8 Runden"},{id:"shoulderCAR",d:"5/Seite"},{id:"hang",d:"30–45 Sek."},{id:"hipAirplane",d:"6/Seite"}],
   p2:[{id:"catCow",d:"8 Runden + Halt"},{id:"scapPull",d:"6",new:1},{id:"hang",d:"3 × 20 Sek. aktiv"},{id:"hipAirplane",d:"8/Seite freistehend",new:1}]},
 
- {dn:"Sa",focus:"Explosiv & Agilität",title:"Spannkraft & schnelle Füße",
+ {dn:"Sa",intensity:4,focus:"Explosiv & Agilität",title:"Spannkraft & schnelle Füße",
   why:"Die fehlende Komponente: Reaktivität. In Phase 1 bewusst sanft, solange das Knie gereizt ist.",
   p1:[{id:"pogo",d:"3 × 15"},{id:"fastFeet",d:"3 × 20 Sek."},{id:"aSkip",d:"3 × 20 Sek."},{id:"spanishSquat",d:"3 × 20 · Zehen tippen"}],
   p2:[{id:"boxJump",d:"4 × 4",new:1},{id:"skater",d:"3 × 6/Seite",new:1},{id:"backward",d:"3 × 30 Sek.",new:1},{id:"pogo",d:"3 × 20, schneller"}]},
 
- {dn:"So",focus:"Locker & Regeneration",title:"Bewegen, nicht belasten",
+ {dn:"So",intensity:1,focus:"Locker & Regeneration",title:"Bewegen, nicht belasten",
   why:"Aktiver Ruhetag. Bewegung hält geschmeidig, ohne Ermüdung — in beiden Phasen gleich.",
   p1:[{id:"deepSquat",d:"2 Min. + Atmung"},{id:"dehnFlow",d:"3 Min."},{id:"legSwings",d:"je 10"},{id:"balance",d:"1 Min./Seite, entspannt"}],
   p2:[{id:"deepSquat",d:"2 Min. + Atmung"},{id:"dehnFlow",d:"3 Min."},{id:"legSwings",d:"je 10"},{id:"balance",d:"1 Min./Seite, entspannt"}]}
@@ -268,7 +293,9 @@ const weekEl=document.getElementById('week');
 DAYS.forEach((d,i)=>{
   const b=document.createElement('button');
   b.className='day';b.setAttribute('aria-selected',i===selected);
-  b.innerHTML=`<div class="dn">${d.dn}</div><div class="tick"></div>`;
+  const h=6+d.intensity*3;
+  b.innerHTML=`<div class="dn">${d.dn}</div><div class="bar"><i style="height:${h}px"></i></div>`;
+  b.setAttribute('aria-label',`${d.dn} · ${d.focus}`);
   b.onclick=()=>{selected=i;render()};
   weekEl.appendChild(b);
 });
